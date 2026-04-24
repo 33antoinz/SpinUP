@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Vinyle Aléatoire</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Animation de chargement d'un disque qui tourne */
+        .spin { animation: spin 2s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white w-full max-w-2xl rounded-3xl shadow-xl overflow-hidden">
+        <div class="p-8">
+            <h1 class="text-3xl font-light text-center text-gray-800 mb-8">Découverte <span class="font-bold">Vinyle</span></h1>
+            
+            <form id="vinylForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Prix max (€)</label>
+                        <input type="number" id="price" min="1" max="1000000" placeholder="Ex: 50" class="w-full border-b-2 border-gray-200 focus:border-black outline-none py-2 transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Année</label>
+                        <input type="number" id="year" min="1900" max="2026" placeholder="Ex: 1973" class="w-full border-b-2 border-gray-200 focus:border-black outline-none py-2 transition-colors">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Genre</label>
+                        <select id="genre" class="w-full border-b-2 border-gray-200 focus:border-black outline-none py-2 bg-transparent">
+                            <option value="">Tous les genres</option>
+                            <option value="Rock">Rock</option>
+                            <option value="Electronic">Électronique</option>
+                            <option value="Jazz">Jazz</option>
+                            <option value="Funk / Soul">Funk / Soul</option>
+                            <option value="Hip Hop">Hip Hop</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Style</label>
+                        <input type="text" id="style" placeholder="Ex: Synth-pop, Bop..." class="w-full border-b-2 border-gray-200 focus:border-black outline-none py-2 transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Pays</label>
+                        <input list="country-list" id="country" placeholder="Rechercher..." class="w-full border-b-2 border-gray-200 focus:border-black outline-none py-2 transition-colors bg-transparent">
+                        <datalist id="country-list">
+                            <option value="Argentina">
+                            <option value="Australia">
+                            <option value="Austria">
+                            <option value="Belgium">
+                            <option value="Brazil">
+                            <option value="Canada">
+                            <option value="Denmark">
+                            <option value="Europe">
+                            <option value="Finland">
+                            <option value="France">
+                            <option value="Germany">
+                            <option value="Greece">
+                            <option value="Ireland">
+                            <option value="Italy">
+                            <option value="Jamaica">
+                            <option value="Japan">
+                            <option value="Mexico">
+                            <option value="Netherlands">
+                            <option value="New Zealand">
+                            <option value="Norway">
+                            <option value="Poland">
+                            <option value="Russia">
+                            <option value="South Africa">
+                            <option value="Spain">
+                            <option value="Sweden">
+                            <option value="Switzerland">
+                            <option value="UK">
+                            <option value="US">
+                            <option value="Yugoslavia">
+                        </datalist>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-2">Format</label>
+                    <div class="flex space-x-4">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="format" value="" checked class="accent-black">
+                            <span>Peu importe</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="format" value="Stereo" class="accent-black">
+                            <span>Stéréo</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="format" value="Mono" class="accent-black">
+                            <span>Mono</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-black text-white font-semibold py-4 rounded-xl hover:bg-gray-800 transition-colors mt-4">
+                    Trouver une pépite
+                </button>
+            </form>
+
+            <div id="resultContainer" class="hidden mt-10 pt-8 border-t border-gray-100 flex flex-col items-center">
+                <div id="loading" class="hidden flex flex-col items-center">
+                    <div class="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full spin mb-4"></div>
+                    <p class="text-gray-500 text-sm">Fouille dans les bacs...</p>
+                </div>
+                
+                <div id="vinylResult" class="hidden w-full flex flex-col items-center text-center">
+                    <img id="coverImage" src="" alt="Pochette du vinyle" class="w-64 h-64 object-cover rounded-lg shadow-2xl mb-6">
+                    <h2 id="albumTitle" class="text-2xl font-bold text-gray-900 mb-1">Titre de l'album</h2>
+                    <p id="albumArtist" class="text-lg text-gray-600 mb-4">Artiste</p>
+                    <div class="flex space-x-2 mb-6 text-xs text-gray-500 uppercase tracking-wide">
+                        <span id="albumYear" class="bg-gray-100 px-3 py-1 rounded-full">Année</span>
+                        <span id="albumCountry" class="bg-gray-100 px-3 py-1 rounded-full">Pays</span>
+                    </div>
+                    <a id="buyLink" href="#" target="_blank" class="text-sm font-semibold border-2 border-black text-black px-6 py-2 rounded-full hover:bg-black hover:text-white transition-colors">
+                        Voir sur Discogs
+                    </a>
+                </div>
+                
+                <p id="errorMessage" class="hidden text-red-500 text-center mt-4"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // NOTE: Pour que ce code soit 100% fonctionnel en production, il te faut une clé API Discogs.
+        // Tu peux en créer une gratuitement sur : https://www.discogs.com/settings/developers
+        const DISCOGS_TOKEN = "TA_CLE_API_ICI"; 
+
+        document.getElementById('vinylForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Récupération des UI
+            const resultContainer = document.getElementById('resultContainer');
+            const loading = document.getElementById('loading');
+            const vinylResult = document.getElementById('vinylResult');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Afficher le chargement
+            resultContainer.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            vinylResult.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            // Récupération des valeurs du formulaire
+            const year = document.getElementById('year').value;
+            const genre = document.getElementById('genre').value;
+            const style = document.getElementById('style').value;
+            const country = document.getElementById('country').value;
+            const format = document.querySelector('input[name="format"]:checked').value;
+            
+            // Construction de la requête API (Format Vinyle forcé)
+            let queryUrl = `https://api.discogs.com/database/search?type=release&format=vinyl`;
+            if (year) queryUrl += `&year=${year}`;
+            if (genre) queryUrl += `&genre=${encodeURIComponent(genre)}`;
+            if (style) queryUrl += `&style=${encodeURIComponent(style)}`;
+            if (country) queryUrl += `&country=${encodeURIComponent(country)}`;
+            if (format) queryUrl += `&format=${format}`;
+            
+            // Ajout du token (désactivé si tu n'as pas encore mis ta clé)
+            if (DISCOGS_TOKEN !== "TA_CLE_API_ICI") {
+                queryUrl += `&token=${DISCOGS_TOKEN}`;
+            }
+
+            try {
+                // Simulation de recherche si pas de clé API (Pour tester l'interface)
+                if (DISCOGS_TOKEN === "xxHsUpnOEMnEclynXOYUiddPlSCDFOTtIEWivuMa") {
+                    await new Promise(r => setTimeout(r, 1500)); // Simule le temps de recherche
+                    afficherVinyle({
+                        title: "Random Access Memories",
+                        cover_image: "https://i.discogs.com/mO3h_hO93Q8K1eC7O1bHl0T1C-YnFkU8z0C0bT3W-qQ/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTQ1NzAz/NjYtMTUwMzI2MzE2/Mi01OTEwLmpwZWc.jpeg",
+                        year: "2013",
+                        country: "Europe",
+                        uri: "/release/4570366-Daft-Punk-Random-Access-Memories"
+                    });
+                    errorMessage.textContent = "Mode démo : Insère ta clé API Discogs dans le code pour chercher de vrais résultats !";
+                    errorMessage.classList.remove('hidden');
+                    return;
+                }
+
+                // Vraie requête API
+                const response = await fetch(queryUrl);
+                const data = await response.json();
+
+                if (data.results && data.results.length > 0) {
+                    // Sélectionner un vinyle au hasard parmi les résultats
+                    const randomIndex = Math.floor(Math.random() * data.results.length);
+                    const randomVinyl = data.results[randomIndex];
+                    afficherVinyle(randomVinyl);
+                } else {
+                    throw new Error("Aucun vinyle trouvé avec ces critères. Essaie d'élargir ta recherche !");
+                }
+
+            } catch (error) {
+                loading.classList.add('hidden');
+                errorMessage.textContent = error.message || "Une erreur est survenue lors de la recherche.";
+                errorMessage.classList.remove('hidden');
+            }
+        });
+
+        function afficherVinyle(vinylData) {
+            document.getElementById('loading').classList.add('hidden');
+            
+            // Séparer l'artiste et le titre (Discogs renvoie souvent "Artiste - Titre")
+            const parts = vinylData.title.split(' - ');
+            const artist = parts.length > 1 ? parts[0] : "Artiste inconnu";
+            const title = parts.length > 1 ? parts.slice(1).join(' - ') : vinylData.title;
+
+            document.getElementById('coverImage').src = vinylData.cover_image || 'https://via.placeholder.com/300?text=Pas+de+pochette';
+            document.getElementById('albumTitle').textContent = title;
+            document.getElementById('albumArtist').textContent = artist;
+            document.getElementById('albumYear').textContent = vinylData.year || 'Année inconnue';
+            document.getElementById('albumCountry').textContent = vinylData.country || 'Pays inconnu';
+            
+            // Lien vers la marketplace pour l'acheter
+            document.getElementById('buyLink').href = `https://www.discogs.com${vinylData.uri}`;
+            
+            document.getElementById('vinylResult').classList.remove('hidden');
+            document.getElementById('vinylResult').classList.add('flex');
+        }
+    </script>
+</body>
+</html>
